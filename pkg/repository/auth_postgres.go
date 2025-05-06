@@ -1,0 +1,40 @@
+package repository
+
+import (
+	"WhyAi/models"
+	"fmt"
+	"github.com/jmoiron/sqlx"
+)
+
+type AuthPostgres struct {
+	db *sqlx.DB
+}
+
+func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
+	return &AuthPostgres{db}
+}
+
+func (a *AuthPostgres) SignUp(user models.User) (int, error) {
+	var id int
+	query := fmt.Sprintf(`INSERT INTO %s (name, email, pass_hash, user_type, sub_level) VALUES ($1, $2,$3, 2, 2) RETURNING id`, userDb)
+	result := a.db.QueryRow(query, user.Name, user.Email, user.Password)
+	err := result.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+
+}
+
+// TODO дописать запрос
+func (a *AuthPostgres) GetUser(username, password string) (models.User, error) {
+	var user models.User
+	query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1 AND pass_hash = $2`, userDb)
+	result := a.db.QueryRow(query, username, password)
+	fmt.Println(result)
+	err := result.Scan(&user.Id, &user.Name, &user.Email)
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
+}

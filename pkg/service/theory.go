@@ -1,16 +1,18 @@
 package service
 
 import (
+	"WhyAi/pkg/repository"
 	"fmt"
 	"io/ioutil"
 	"log"
 )
 
 type TheoryService struct {
+	repo repository.Repository
 }
 
-func NewTheoryService() *TheoryService {
-	return &TheoryService{}
+func NewTheoryService(repo repository.Repository) *TheoryService {
+	return &TheoryService{repo: repo}
 }
 
 func GetTheory(n string) (string, error) {

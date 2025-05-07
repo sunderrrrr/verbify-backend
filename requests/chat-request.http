@@ -1,0 +1,15 @@
+### GET request to example server
+
+GET http://localhost:8090/api/v1/theory/5/chat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY2OTMyMzMsImlhdCI6MTc0NjY1MDAzMywidXNlcl9pZCI6NSwidXNlcm5hbWUiOiJxdyJ9.BR3ARMGGeDnhx93C04scZu05KHBqt3hZOGoK623ICVQ
+
+###
+
+POST http://localhost:8090/api/v1/theory/5/chat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY2OTMyMzMsImlhdCI6MTc0NjY1MDAzMywidXNlcl9pZCI6NSwidXNlcm5hbWUiOiJxdyJ9.BR3ARMGGeDnhx93C04scZu05KHBqt3hZOGoK623ICVQ
+Content-Type: application/json
+
+{
+"role": "user",
+"content":"пук пук"
+}

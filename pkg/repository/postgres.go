@@ -19,6 +19,7 @@ type DB struct {
 const (
 	userDb = "users"
 	chatDb = "chats"
+	msgDb  = "messages"
 )
 
 func NewDB(db DB) (*sqlx.DB, error) {

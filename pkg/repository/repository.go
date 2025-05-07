@@ -11,10 +11,10 @@ type Repository struct {
 }
 
 type Chat interface {
-	ChatExist(taskId, userId int) bool
+	ChatExist(taskId, userId int) (bool, error)
 	CreateChat(userId, taskId int) (int, error)
 	AddMessage(taskId, userId int, message models.Message) error
-	GetChat(taskId, userId int) (models.Chat, error)
+	GetChat(taskId, userId int) ([]models.Message, error)
 }
 
 type Auth interface {
@@ -23,5 +23,9 @@ type Auth interface {
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{Auth: NewAuthPostgres(db)}
+	return &Repository{
+		Auth: NewAuthPostgres(db),
+		Chat: NewChatPostgres(db),
+	}
+
 }

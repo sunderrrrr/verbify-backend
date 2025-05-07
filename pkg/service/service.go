@@ -8,6 +8,8 @@ import (
 type Service struct {
 	Theory
 	Auth
+	LLM
+	Chat
 }
 type Theory interface {
 	SendTheory(n string) (string, error)
@@ -18,7 +20,20 @@ type Auth interface {
 	ParseToken(token string) (models.User, error)
 }
 
+type LLM interface {
+	SendMessage(message models.Message) (*models.Message, error)
+}
+
+type Chat interface {
+	Chat(taskId, userId int) ([]models.Message, error)
+	AddMessage(taskId, userId int, message models.Message) error
+}
+
 func NewService(repo *repository.Repository) *Service {
-	return &Service{Auth: NewAuthService(repo),
-		Theory: NewTheoryService()}
+	return &Service{
+		Auth:   NewAuthService(repo),
+		Theory: NewTheoryService(*repo),
+		LLM:    NewLLMService("", ""),
+		Chat:   NewChatService(repo),
+	}
 }

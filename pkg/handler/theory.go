@@ -12,7 +12,7 @@ func (h *Handler) SendTheory(c *gin.Context) {
 		return
 	}
 
-	theory, err := h.service.Theory.SendTheory(n)
+	theory, err := h.service.Theory.SendTheory(n, false)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}

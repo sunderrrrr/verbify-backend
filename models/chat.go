@@ -46,13 +46,14 @@ func (c *Chat) Exists() bool {
 }
 
 type LLMRequest struct {
+	Model    string    `json:"model"`
 	Messages []Message `db:"messages" json:"messages"`
 	MaxToken int       `db:"max_token" json:"max_token,omitempty"`
 	Stream   bool      `db:"stream" json:"stream,omitempty"`
 }
 
 type LLMResponse struct {
-	ID      int `db:"id" json:"id"`
+	ID      string `db:"id" json:"id"`
 	Choices []struct {
 		Message Message `json:"message"`
 	} `json:"choices"`

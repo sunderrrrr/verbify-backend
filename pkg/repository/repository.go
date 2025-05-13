@@ -14,6 +14,7 @@ type Chat interface {
 	ChatExist(taskId, userId int) (bool, error)
 	CreateChat(userId, taskId int) (int, error)
 	AddMessage(taskId, userId int, message models.Message) error
+	ClearContext(taskId, userId int) error
 	GetChat(taskId, userId int) ([]models.Message, error)
 }
 

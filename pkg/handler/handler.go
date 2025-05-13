@@ -4,6 +4,8 @@ import (
 	"WhyAi/pkg/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"strings"
+	"time"
 )
 
 type Handler struct {
@@ -16,7 +18,18 @@ func NewHandler(service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-	router.Use(cors.Default())
+	router.RedirectTrailingSlash = false
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3002"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
+		ExposeHeaders:    []string{"Content-Length", "Authorization"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return strings.HasPrefix(origin, "http://localhost:")
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	api := router.Group("/api")
 	{
 		v1 := api.Group("/v1")
@@ -39,10 +52,22 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				theory.GET("/:id", h.SendTheory)           //Получение теории
 				theory.POST("/:id/chat", h.SendMessage)    //Сообщение по заданию
 				theory.GET("/:id/chat", h.GetOrCreateChat) // Получить чат
+				theory.DELETE("/:id/chat", h.ClearContext) //Стереть контекст
 			}
 			fact := v1.Group("/fact")
+			fact.Use(cors.New(cors.Config{
+				AllowOrigins:     []string{"http://localhost:3002"},
+				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+				AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
+				ExposeHeaders:    []string{"Content-Length", "Authorization"},
+				AllowCredentials: true,
+				AllowOriginFunc: func(origin string) bool {
+					return strings.HasPrefix(origin, "http://localhost:")
+				},
+				MaxAge: 12 * time.Hour,
+			}))
 			{
-				fact.GET("/") //Получить случайный лайфхак, ну или массив лайфхаков, чтобы уменьшить нагрузку
+				fact.GET("", h.GetFact) //Получить случайный лайфхак, ну или массив лайфхаков, чтобы уменьшить нагрузку
 			}
 		}
 

@@ -10,9 +10,10 @@ type Service struct {
 	Auth
 	LLM
 	Chat
+	Facts
 }
 type Theory interface {
-	SendTheory(n string) (string, error)
+	SendTheory(n string, forBot bool) (string, error)
 }
 type Auth interface {
 	CreateUser(user models.User) (int, error)
@@ -21,19 +22,26 @@ type Auth interface {
 }
 
 type LLM interface {
-	SendMessage(message models.Message) (*models.Message, error)
+	AskLLM(messages []models.Message) (*models.Message, error)
 }
 
 type Chat interface {
+	ChatExist(taskId, userId int) (bool, error)
 	Chat(taskId, userId int) ([]models.Message, error)
-	AddMessage(taskId, userId int, message models.Message) error
+	AddMessage(taskId int, userId int, message models.Message) error
+	ClearContext(taskId, userId int) error
+}
+
+type Facts interface {
+	GetFacts() ([]models.Fact, error)
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		Auth:   NewAuthService(repo),
 		Theory: NewTheoryService(*repo),
-		LLM:    NewLLMService("", ""),
-		Chat:   NewChatService(repo),
+		LLM:    NewLLMService("https://api.proxyapi.ru/deepseek/chat/completions", "sk-zKw9A1XvnEQiztA0ENd84uAsvgPKgnG8"),
+		Chat:   NewChatService(*repo),
+		Facts:  NewFactService(),
 	}
 }

@@ -20,15 +20,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 	router.RedirectTrailingSlash = false
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3002"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004", "http://localhost:3005"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
 		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return strings.HasPrefix(origin, "http://localhost:")
-		},
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 	api := router.Group("/api")
 	{
@@ -42,7 +39,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				//auth.POST("/reset-request", h.passwordResetRequest)
 				//auth.POST("/reset-confirm/", h.passwordResetConfirm)
 			}
-			user := v1.Group("/user", h.userIdentity) // Инфа пользователя, подписки, стата мейби хз
+			user := v1.Group("/user", h.userIdentity) // Инфа пользователя, подписки
 			{
 				user.GET("/info", h.GetUserInfo)
 				user.PUT("/update", h.UpdateUserInfo)
@@ -56,7 +53,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			}
 			fact := v1.Group("/fact")
 			fact.Use(cors.New(cors.Config{
-				AllowOrigins:     []string{"http://localhost:3002"},
 				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 				AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
 				ExposeHeaders:    []string{"Content-Length", "Authorization"},

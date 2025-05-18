@@ -30,12 +30,15 @@ func (h *Handler) GetOrCreateChat(c *gin.Context) {
 
 		return
 	}
+	fmt.Println(req)
 	if req == nil {
 		theory, _ := h.service.Theory.SendTheory(c.Param("id"), false)
+		fmt.Println(theory)
 		msg := models.Message{
 			Role:    "system",
 			Content: initPrompt + theory,
 		}
+		fmt.Println(msg)
 		req := h.service.Chat.AddMessage(taskId, userId, msg) //Добавляем вопрос пользователя
 		if req != nil {
 			NewErrorResponse(c, http.StatusInternalServerError, "send message failed "+req.Error())
@@ -71,7 +74,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 		return
 
 	}
-	fmt.Println(history)
+	//fmt.Println(history)
 	ask, err := h.service.AskLLM(history)
 
 	if err != nil {
@@ -91,7 +94,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 	final, err := h.service.Chat.Chat(taskId, userId)
 	logrus.Infof("final")
 	c.JSON(http.StatusOK, gin.H{"result": final})
-	fmt.Println(final)
+	//fmt.Println(final)
 }
 
 func (h *Handler) ClearContext(c *gin.Context) {

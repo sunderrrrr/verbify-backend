@@ -4,7 +4,6 @@ import (
 	"WhyAi/pkg/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"strings"
 	"time"
 )
 
@@ -16,11 +15,11 @@ func NewHandler(service *service.Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 	router := gin.New()
 	router.RedirectTrailingSlash = false
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004", "http://localhost:3005"},
+		AllowOrigins:     []string{frontendUrl},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
@@ -57,10 +56,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Baggage", "Sentry-Trace"},
 				ExposeHeaders:    []string{"Content-Length", "Authorization"},
 				AllowCredentials: true,
-				AllowOriginFunc: func(origin string) bool {
-					return strings.HasPrefix(origin, "http://localhost:")
-				},
-				MaxAge: 12 * time.Hour,
+				AllowOrigins:     []string{frontendUrl},
+				MaxAge:           12 * time.Hour,
 			}))
 			{
 				fact.GET("", h.GetFact) //Получить случайный лайфхак, ну или массив лайфхаков, чтобы уменьшить нагрузку

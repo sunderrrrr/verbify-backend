@@ -30,7 +30,7 @@ func main() {
 	NewService := service.NewService(NewRepository)
 	NewHandler := handler.NewHandler(NewService)
 	server := new(WhyAi.Server)
-	err = server.Run(os.Getenv("SERVER_PORT"), NewHandler.InitRoutes())
+	err = server.Run(os.Getenv("SERVER_PORT"), NewHandler.InitRoutes(os.Getenv("FRONTEND_URL")))
 	if err != nil {
 		log.Fatal(err)
 	}

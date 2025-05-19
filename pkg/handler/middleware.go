@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -37,7 +36,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	}
 	c.Set(userCtx, userId.Id)
 	c.Set(usernameCtx, userId.Name)
-	fmt.Println("middleware.go: userId:", userId)
+	//fmt.Println("middleware.go: userId:", userId)
 }
 
 func getUserId(c *gin.Context) (int, error) {

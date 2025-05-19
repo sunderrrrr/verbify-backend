@@ -50,6 +50,10 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 				theory.GET("/:id/chat", h.GetOrCreateChat) // Получить чат
 				theory.DELETE("/:id/chat", h.ClearContext) //Стереть контекст
 			}
+			essay := v1.Group("/essay", h.userIdentity)
+			{
+				essay.GET("/themes", h.GetEssayTasks)
+			}
 			fact := v1.Group("/fact")
 			fact.Use(cors.New(cors.Config{
 				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

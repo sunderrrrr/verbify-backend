@@ -17,7 +17,7 @@ func NewTheoryService(repo repository.Repository) *TheoryService {
 
 func GetTheory(n string, forBot bool) (string, error) {
 
-	data, err := ioutil.ReadFile(fmt.Sprintf("./static/%s.txt", n))
+	data, err := ioutil.ReadFile(fmt.Sprintf("./static/theory/%s.txt", n))
 	if err != nil {
 		log.Printf("Ошибка чтения файла: %v", err)
 		return "", err

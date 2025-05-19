@@ -2,7 +2,6 @@ package handler
 
 import (
 	"WhyAi/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -30,15 +29,15 @@ func (h *Handler) GetOrCreateChat(c *gin.Context) {
 
 		return
 	}
-	fmt.Println(req)
+	//fmt.Println(req)
 	if req == nil {
 		theory, _ := h.service.Theory.SendTheory(c.Param("id"), false)
-		fmt.Println(theory)
+		//fmt.Println(theory)
 		msg := models.Message{
 			Role:    "system",
 			Content: initPrompt + theory,
 		}
-		fmt.Println(msg)
+		//fmt.Println(msg)
 		req := h.service.Chat.AddMessage(taskId, userId, msg) //Добавляем вопрос пользователя
 		if req != nil {
 			NewErrorResponse(c, http.StatusInternalServerError, "send message failed "+req.Error())

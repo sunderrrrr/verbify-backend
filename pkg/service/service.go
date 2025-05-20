@@ -38,6 +38,7 @@ type Facts interface {
 }
 type Essay interface {
 	GetEssayThemes() ([]models.EssayTheme, error)
+	GenerateUserPrompt(request models.EssayRequest) (string, error)
 }
 
 func NewService(repo *repository.Repository) *Service {

@@ -53,6 +53,7 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 			essay := v1.Group("/essay", h.userIdentity)
 			{
 				essay.GET("/themes", h.GetEssayTasks)
+				essay.POST("/", h.SendEssay)
 			}
 			fact := v1.Group("/fact")
 			fact.Use(cors.New(cors.Config{

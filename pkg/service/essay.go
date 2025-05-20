@@ -3,6 +3,7 @@ package service
 import (
 	"WhyAi/models"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
 
@@ -24,4 +25,14 @@ func (s *EssayService) GetEssayThemes() ([]models.EssayTheme, error) {
 		return nil, err
 	}
 	return themes, nil
+}
+
+func (s *EssayService) GenerateUserPrompt(request models.EssayRequest) (string, error) {
+	prompt, err := ioutil.ReadFile("./static/theory/essay.txt")
+	if err != nil {
+		return "", err
+	}
+	essayContext := string(prompt)
+	userPrompt := fmt.Sprintf(essayContext, request.Essay, request.Theme, request.Text)
+	return userPrompt, nil
 }

@@ -25,7 +25,7 @@ type Auth interface {
 }
 
 type User interface {
-	ResetPassword(username string, oldPassword string, newPassword string) error
+	ResetPassword(username string, newPassword string) error
 }
 
 func NewRepository(db *sqlx.DB) *Repository {

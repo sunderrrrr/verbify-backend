@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"log"
-	"net/smtp"
 	"os"
 	"time"
 )
@@ -36,7 +35,7 @@ func (s *UserService) GeneratePasswordResetToken(email, signingKey string) (stri
 }
 
 func (s *UserService) ResetPassword(resetModel models.UserReset) error {
-	token, err := jwt.ParseWithClaims(resetModel.Token, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(resetModel.Token, &ResetClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
@@ -57,7 +56,7 @@ func (s *UserService) ResetPassword(resetModel models.UserReset) error {
 	if email == "" {
 		return errors.New("empty email")
 	}
-	return s.repo.ResetPassword(email, generatePasswordHash(resetModel.OldPass), generatePasswordHash(resetModel.NewPass))
+	return s.repo.ResetPassword(email, generatePasswordHash(resetModel.NewPass))
 }
 
 func (s *UserService) ResetPasswordRequest(email models.ResetRequest) error {
@@ -66,35 +65,37 @@ func (s *UserService) ResetPasswordRequest(email models.ResetRequest) error {
 	if err != nil {
 		return err
 	}
-	resetLink := fmt.Sprintf("%s/reset-confirm/?token=%s", os.Getenv("DB_HOST"), token)
-	from := os.Getenv("DB_HOST")
-	password := os.Getenv("DB_HOST")
+	resetLink := fmt.Sprintf("%s/reset-confirm/?t=%s", os.Getenv("FRONTEND_URL"), token)
 	fmt.Println(resetLink)
-	// Информация о получателе
-	to := []string{
-		email.Login,
-	}
+	/*
+		from := os.Getenv("DB_HOST")
+		password := os.Getenv("DB_HOST")
+		fmt.Println(resetLink)
+		// Информация о получателе
+		to := []string{
+			email.Login,
+		}
 
-	// smtp сервер конфигурация
-	smtpHost := os.Getenv("DB_HOST")
-	smtpPort := os.Getenv("DB_HOST")
+		// smtp сервер конфигурация
+		smtpHost := os.Getenv("DB_HOST")
+		smtpPort := os.Getenv("DB_HOST")
 
-	// Сообщение.
-	message := []byte("<h1>Сброс пароля</h1>\n" +
-		"<p>Перейдите по ссылке, чтобы сбросить пароль</p>\n" +
-		"<a href=\"" + resetLink + "\">Сброс</a>\n" +
-		"<p>Если вы не запрашивали сброс, не переходите. Время действия ссылки один час</p>")
-	log.Default().Println("mail gen end")
-	// Авторизация.
-	auth := smtp.PlainAuth("", from, password, smtpHost)
+		// Сообщение.
+		message := []byte("<h1>Сброс пароля</h1>\n" +
+			"<p>Перейдите по ссылке, чтобы сбросить пароль</p>\n" +
+			"<a href=\"" + resetLink + "\">Сброс</a>\n" +
+			"<p>Если вы не запрашивали сброс, не переходите. Время действия ссылки один час</p>")
+		log.Default().Println("mail gen end")
+		// Авторизация.
+		auth := smtp.PlainAuth("", from, password, smtpHost)
 
-	// Отправка почты.
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
-	if err != nil {
-		return err
+		// Отправка почты.
+		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+		if err != nil {
+			return err
 
-	}
-	fmt.Println("Почта отправлена!")
+		}
+		fmt.Println("Почта отправлена!") */
 	return nil
 
 }

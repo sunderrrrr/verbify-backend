@@ -32,15 +32,15 @@ const (
 
 func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 	//get user from db
-	fmt.Println("StartGenToken")
+
 	user, err := s.repo.GetUser(login.Email, generatePasswordHash(login.Password), true)
 
 	if err != nil {
 
-		//fmt.Println("Failed Get User")
+		// ("Failed Get User")
 		return "fail", err
 	}
-	//fmt.Println("auth.go: ", user)
+	// ("auth.go: ", user)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
@@ -49,7 +49,7 @@ func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 		user.Id,
 		user.Name,
 	})
-	//fmt.Println("EndGenToken")
+	// ("EndGenToken")
 	return token.SignedString([]byte(signingKey))
 }
 

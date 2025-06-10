@@ -35,8 +35,8 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 
 				auth.POST("/sign-up", h.signUp)
 				auth.POST("/sign-in", h.signIn)
-				//auth.POST("/reset-request", h.passwordResetRequest)
-				//auth.POST("/reset-confirm/", h.passwordResetConfirm)
+				auth.POST("/forgot", h.SendResetRequest)
+				auth.POST("/reset", h.UpdatePassword)
 			}
 			user := v1.Group("/user", h.userIdentity) // Инфа пользователя, подписки
 			{

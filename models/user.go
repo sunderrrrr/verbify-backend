@@ -14,10 +14,8 @@ type AuthUser struct {
 }
 
 type UserReset struct {
-	Username string `json:"username" binding:"required"`
-	Token    string `json:"token" binding:"required"`
-	OldPass  string `json:"old_password" binding:"required"`
-	NewPass  string `json:"new_password" binding:"required"`
+	Token   string `json:"token" binding:"required"`
+	NewPass string `json:"new_password" binding:"required"`
 }
 
 type ResetRequest struct {

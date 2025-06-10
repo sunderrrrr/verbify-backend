@@ -8,6 +8,7 @@ import (
 type Repository struct {
 	Chat
 	Auth
+	User
 }
 
 type Chat interface {
@@ -20,13 +21,18 @@ type Chat interface {
 
 type Auth interface {
 	SignUp(user models.User) (int, error)
-	GetUser(username, password string) (models.User, error)
+	GetUser(username, password string, login bool) (models.User, error)
+}
+
+type User interface {
+	ResetPassword(username string, oldPassword string, newPassword string) error
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Auth: NewAuthPostgres(db),
 		Chat: NewChatPostgres(db),
+		User: NewUserRepository(db),
 	}
 
 }

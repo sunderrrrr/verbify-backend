@@ -12,6 +12,7 @@ type Service struct {
 	Chat
 	Facts
 	Essay
+	User
 }
 type Theory interface {
 	SendTheory(n string, forBot bool) (string, error)
@@ -40,6 +41,11 @@ type Essay interface {
 	GetEssayThemes() ([]models.EssayTheme, error)
 	GenerateUserPrompt(request models.EssayRequest) (string, error)
 }
+type User interface {
+	ResetPassword(resetModel models.UserReset) error
+	ResetPasswordRequest(email models.ResetRequest) error
+	GeneratePasswordResetToken(email, signingKey string) (string, error)
+}
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
@@ -49,5 +55,6 @@ func NewService(repo *repository.Repository) *Service {
 		Chat:   NewChatService(*repo),
 		Facts:  NewFactService(),
 		Essay:  NewEssayService(),
+		User:   NewUserService(repo.User),
 	}
 }

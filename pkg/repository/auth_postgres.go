@@ -2,6 +2,7 @@ package repository
 
 import (
 	"WhyAi/models"
+	"database/sql"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 )
@@ -27,11 +28,16 @@ func (a *AuthPostgres) SignUp(user models.User) (int, error) {
 }
 
 // TODO дописать запрос
-func (a *AuthPostgres) GetUser(username, password string) (models.User, error) {
+func (a *AuthPostgres) GetUser(username, password string, login bool) (models.User, error) {
 	var user models.User
-	query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1 AND pass_hash = $2`, userDb)
-	result := a.db.QueryRow(query, username, password)
-	fmt.Println(result)
+	var result *sql.Row
+	if login {
+		query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1 AND pass_hash = $2`, userDb)
+		result = a.db.QueryRow(query, username, password)
+	} else {
+		query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1`, userDb)
+		result = a.db.QueryRow(query, username)
+	}
 	err := result.Scan(&user.Id, &user.Name, &user.Email)
 	if err != nil {
 		return models.User{}, err

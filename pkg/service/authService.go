@@ -33,7 +33,7 @@ const (
 func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 	//get user from db
 	fmt.Println("StartGenToken")
-	user, err := s.repo.GetUser(login.Email, generatePasswordHash(login.Password))
+	user, err := s.repo.GetUser(login.Email, generatePasswordHash(login.Password), true)
 
 	if err != nil {
 

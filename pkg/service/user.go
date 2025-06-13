@@ -65,7 +65,7 @@ func (s *UserService) ResetPasswordRequest(email models.ResetRequest) error {
 	if err != nil {
 		return err
 	}
-	resetLink := fmt.Sprintf("%s/reset-confirm/?t=%s", os.Getenv("FRONTEND_URL"), token)
+	resetLink := fmt.Sprintf("%s/reset/?t=%s", os.Getenv("FRONTEND_URL"), token)
 	fmt.Println(resetLink)
 	/*
 		from := os.Getenv("DB_HOST")

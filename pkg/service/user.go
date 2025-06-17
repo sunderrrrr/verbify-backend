@@ -3,10 +3,10 @@ package service
 import (
 	"WhyAi/models"
 	"WhyAi/pkg/repository"
+	"WhyAi/pkg/utils/logger"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
-	"log"
 	"os"
 	"time"
 )
@@ -24,6 +24,7 @@ func NewUserService(repo repository.User) *UserService {
 }
 func (s *UserService) GeneratePasswordResetToken(email, signingKey string) (string, error) {
 	if email == "" || email == " " {
+		logger.Log.Error("Email is empty")
 		return "", errors.New("email is empty")
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &ResetClaims{
@@ -46,17 +47,19 @@ func (s *UserService) ResetPassword(resetModel models.UserReset) error {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		logger.Log.Error("Error while parsing token: %v", err)
 		return err
 	}
 	claims, ok := token.Claims.(*ResetClaims)
 	fmt.Println(claims)
 	if !ok || !token.Valid {
-		fmt.Println(token)
+		logger.Log.Error("Invalid token")
 		return errors.New("token claims are not of type jwt.MapClaims or token invalid")
 
 	}
 	email := claims.Username
 	if email == "" {
+		logger.Log.Error("Empty email in token claims")
 		return errors.New("empty email")
 	}
 	return s.repo.ResetPassword(email, generatePasswordHash(resetModel.NewPass))
@@ -64,8 +67,8 @@ func (s *UserService) ResetPassword(resetModel models.UserReset) error {
 
 func (s *UserService) ResetPasswordRequest(email models.ResetRequest) error {
 	token, err := s.GeneratePasswordResetToken(email.Login, signingKey)
-	log.Default().Println("end gen reset token")
 	if err != nil {
+		logger.Log.Errorf("Error while generating token: %v", err)
 		return err
 	}
 	resetLink := fmt.Sprintf("%s/reset/?t=%s", os.Getenv("FRONTEND_URL"), token)

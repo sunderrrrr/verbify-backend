@@ -2,6 +2,7 @@ package service
 
 import (
 	"WhyAi/models"
+	"WhyAi/pkg/utils/logger"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -27,22 +28,26 @@ func (s *LLMService) AskLLM(messages []models.Message, isEssay bool) (*models.Me
 	var res models.LLMResponse
 	body, err := json.Marshal(request)
 	if err != nil {
+		logger.Log.Errorf("Error while marshaling LLM request: %v", err)
 		return nil, errors.New("request marshal fail")
 	}
 
-	req, err := http.NewRequest("POST", s.ApiUrl, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+s.Token)
-	resp, err := http.DefaultClient.Do(req)
+	llmRequest, err := http.NewRequest("POST", s.ApiUrl, bytes.NewReader(body))
+	llmRequest.Header.Set("Content-Type", "application/json")
+	llmRequest.Header.Set("Authorization", "Bearer "+s.Token)
+	resp, err := http.DefaultClient.Do(llmRequest)
 	if err != nil {
+		logger.Log.Errorf("Error while LLM request: %v", err)
 		return nil, errors.New("fail request")
 	}
 	defer resp.Body.Close()
 
 	if err = json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		logger.Log.Errorf("Error while decoding LLM response: %v", err)
 		return nil, errors.New("fail to decode response " + err.Error())
 	}
 	if len(res.Choices) == 0 {
+		logger.Log.Error("LLM response has no choices")
 		return nil, errors.New("no choices in response")
 	}
 	ans := &res.Choices[0].Message

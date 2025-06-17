@@ -2,6 +2,7 @@ package repository
 
 import (
 	"WhyAi/models"
+	"WhyAi/pkg/utils/logger"
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -19,6 +20,7 @@ func (p *ChatPostgres) ChatExist(taskId, userId int) (bool, error) {
 	query := fmt.Sprintf(`SELECT EXISTS(SELECT FROM %s WHERE user_id = $1 AND task_id = $2)`, chatDb)
 	err := p.db.Get(&exists, query, userId, taskId)
 	if err != nil {
+		logger.Log.Error("Error checking chat existence: %v", err)
 		return exists, err
 	}
 	return exists, nil
@@ -31,6 +33,7 @@ func (p *ChatPostgres) CreateChat(userId, taskId int) (int, error) {
 	}
 	fmt.Println("111", exists)
 	if exists {
+		logger.Log.Error("Chat already exists for user %d and task %d", userId, taskId)
 		return -1, errors.New("chat already exists")
 	}
 	query := fmt.Sprintf("INSERT INTO %s (task_id, user_id) VALUES ($1, $2)", chatDb)
@@ -46,6 +49,7 @@ func (p *ChatPostgres) AddMessage(taskId, userId int, message models.Message) er
 	exists, err := p.ChatExist(taskId, userId)
 
 	if err != nil {
+		logger.Log.Error("Error checking chat existence: %v", err)
 		return fmt.Errorf("failed to check chat existence: %w", err)
 	}
 
@@ -53,6 +57,7 @@ func (p *ChatPostgres) AddMessage(taskId, userId int, message models.Message) er
 		// Автоматически создаем чат, если его нет
 		_, err = p.CreateChat(userId, taskId)
 		if err != nil {
+			logger.Log.Error("Error auto-creating chat: %v", err)
 			return fmt.Errorf("failed to auto-create chat: %w", err)
 		}
 	}
@@ -60,9 +65,9 @@ func (p *ChatPostgres) AddMessage(taskId, userId int, message models.Message) er
 	query := `INSERT INTO messages (user_id, task_id, role, content) VALUES ($1, $2, $3, $4)`
 	_, err = p.db.Exec(query, userId, taskId, message.Role, message.Content)
 	if err != nil {
+		logger.Log.Error("Error adding message to chat: %v", err)
 		return err
 	}
-	//fmt.Println("reqqqq", req.RowsAffected)
 
 	return nil
 }
@@ -79,6 +84,7 @@ func (p *ChatPostgres) ClearContext(taskId, userId int) error {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE user_id=$1 AND task_id=$2`, chatDb)
 	_, err := p.db.Exec(query, userId, taskId)
 	if err != nil {
+		logger.Log.Error("Error clearing chat context: %v", err)
 		return err
 	}
 	return nil

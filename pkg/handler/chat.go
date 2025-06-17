@@ -2,8 +2,9 @@ package handler
 
 import (
 	"WhyAi/models"
+	"WhyAi/pkg/utils/logger"
+	"WhyAi/pkg/utils/responser"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
@@ -17,7 +18,8 @@ type EmptyChat struct{}
 func (h *Handler) GetOrCreateChat(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		logger.Log.Errorf("Error while getting user id: %v", err)
 		return
 	}
 	taskId, err := strconv.Atoi(c.Param("id"))
@@ -25,22 +27,20 @@ func (h *Handler) GetOrCreateChat(c *gin.Context) {
 	req, err := h.service.Chat.Chat(taskId, userId)
 
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "get chat failed")
+		logger.Log.Errorf("Error while getting chat: %v", err)
 		return
 	}
-	//fmt.Println(req)
 	if req == nil {
 		theory, _ := h.service.Theory.SendTheory(c.Param("id"), false)
-		//fmt.Println(theory)
 		msg := models.Message{
 			Role:    "system",
 			Content: initPrompt + theory,
 		}
-		//fmt.Println(msg)
 		req := h.service.Chat.AddMessage(taskId, userId, msg) //Добавляем вопрос пользователя
 		if req != nil {
-			NewErrorResponse(c, http.StatusInternalServerError, "send message failed "+req.Error())
+			responser.NewErrorResponse(c, http.StatusInternalServerError, "send message failed")
+			logger.Log.Errorf("Error while getting user id: %v", err)
 			return
 		}
 	}
@@ -51,40 +51,42 @@ func (h *Handler) SendMessage(c *gin.Context) {
 	userId, err := getUserId(c)
 	var msg models.Message
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		logger.Log.Errorf("Error while getting user id: %v", err)
 		return
 	}
 	taskId, err := strconv.Atoi(c.Param("id"))
 	if err := c.ShouldBindJSON(&msg); err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logger.Log.Errorf("Error while binding input: %v", err)
+		return
 	}
 	req := h.service.Chat.AddMessage(taskId, userId, msg) //Добавляем вопрос пользователя
 	if req != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "send message failed")
-		logrus.Errorf("send message failed %s", req.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "send message failed")
+		logger.Log.Errorf("Error while add message: %v", err)
 		return
 	}
 	history, err := h.service.Chat.Chat(taskId, userId)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "failed get history")
-		logrus.Errorf("get history failed %s", err.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "failed get history")
+		logger.Log.Errorf("Error while get history: %v", err)
 		return
 	}
 	ask, err := h.service.AskLLM(history, false)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "ask fail")
-		logrus.Errorf("ask fail: %s", err.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "ask fail")
+		logger.Log.Errorf("Error while LLM asking: %v", err)
 		return
 	}
-	logrus.Infof("ask comlite")
 	if ask == nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "llm error")
-		logrus.Errorf("llm error: %s", err.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "llm error")
+		logger.Log.Errorf("Ask equals nil: %v", err)
 		return
 	}
 	if err = h.service.Chat.AddMessage(taskId, userId, *ask); err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "add msg failed "+err.Error())
-		logrus.Errorf("chat error: %s", err.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "add msg failed "+err.Error())
+		logger.Log.Errorf("Error while add message: %v", err)
 		return
 	}
 	final, err := h.service.Chat.Chat(taskId, userId)
@@ -94,7 +96,8 @@ func (h *Handler) SendMessage(c *gin.Context) {
 func (h *Handler) ClearContext(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "invalid user id")
+		logger.Log.Errorf("Error while getting user id: %v", err)
 		return
 	}
 	taskId, err := strconv.Atoi(c.Param("id"))
@@ -105,9 +108,10 @@ func (h *Handler) ClearContext(c *gin.Context) {
 		Role:    "system",
 		Content: initPrompt + theory,
 	}
-	req := h.service.Chat.AddMessage(taskId, userId, msg) //Добавляем вопрос пользователя
+	req := h.service.Chat.AddMessage(taskId, userId, msg) // Заново добавляем системное сообщение
 	if req != nil {
-		NewErrorResponse(c, http.StatusInternalServerError, "send message failed "+req.Error())
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "send message failed "+req.Error())
+		logger.Log.Errorf("Error while adding initial prompt: %v", req)
 		return
 	}
 

@@ -16,6 +16,7 @@ func NewHandler(service *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.RedirectTrailingSlash = false
 	router.Use(cors.New(cors.Config{

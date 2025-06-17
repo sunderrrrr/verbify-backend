@@ -3,6 +3,7 @@ package service
 import (
 	"WhyAi/models"
 	"WhyAi/pkg/repository"
+	"WhyAi/pkg/utils/logger"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -38,11 +39,9 @@ func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 	user, err := s.repo.GetUser(login.Email, generatePasswordHash(login.Password), true)
 
 	if err != nil {
-
-		// ("Failed Get User")
+		logger.Log.Errorf("AuthService.GenerateToken error: %v", err.Error())
 		return "fail", err
 	}
-	// ("auth.go: ", user)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
@@ -53,7 +52,6 @@ func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 		user.UserType,
 		user.Subsription,
 	})
-	// ("EndGenToken")
 	return token.SignedString([]byte(signingKey))
 }
 
@@ -66,6 +64,8 @@ func (s *AuthService) ParseToken(accessToken string) (models.User, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		logger.Log.Errorf("AuthService.ParseToken error: %v", err.Error())
+
 		return models.User{}, err
 	}
 

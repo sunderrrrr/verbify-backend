@@ -1,8 +1,8 @@
-package handler
+package responser
 
 import (
+	"WhyAi/pkg/utils/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type errorResponse struct {
@@ -10,6 +10,6 @@ type errorResponse struct {
 }
 
 func NewErrorResponse(c *gin.Context, statusCode int, msg string) {
-	logrus.Println(msg)
 	c.AbortWithStatusJSON(statusCode, errorResponse{Msg: msg})
+	logger.Log.Error("Error while binding input: %v", msg)
 }

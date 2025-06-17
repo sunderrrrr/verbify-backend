@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"WhyAi/pkg/utils/responser"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -17,13 +18,13 @@ const (
 func (h *Handler) userIdentity(c *gin.Context) {
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
-		NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no authorization header")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no authorization header")
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 {
-		NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid authorization header")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid authorization header")
 		return
 	}
 
@@ -31,7 +32,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	//fmt.Println("middleware: headerParts", headerParts[1])
 	userId, err := h.service.Auth.ParseToken(headerParts[1])
 	if err != nil {
-		NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+		responser.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 	c.Set(userCtx, userId.Id)
@@ -42,12 +43,12 @@ func (h *Handler) userIdentity(c *gin.Context) {
 func getUserId(c *gin.Context) (int, error) {
 	id, ok := c.Get(userCtx)
 	if !ok {
-		NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no user id")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no user id")
 		return 0, errors.New("middleware.go: no user id")
 	}
 	idInt, ok := id.(int)
 	if !ok {
-		NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid user id")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid user id")
 		return 0, errors.New("middleware.go: invalid user id")
 	}
 	return idInt, nil
@@ -56,7 +57,7 @@ func getUserId(c *gin.Context) (int, error) {
 func getUsername(c *gin.Context) (string, error) {
 	username, ok := c.Get(usernameCtx)
 	if !ok {
-		NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no user id")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no user id")
 		return "", errors.New("middleware.go: no user id")
 	}
 	return username.(string), nil

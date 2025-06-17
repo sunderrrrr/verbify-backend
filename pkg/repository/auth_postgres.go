@@ -2,6 +2,7 @@ package repository
 
 import (
 	"WhyAi/models"
+	"WhyAi/pkg/utils/logger"
 	"database/sql"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -21,6 +22,7 @@ func (a *AuthPostgres) SignUp(user models.User) (int, error) {
 	result := a.db.QueryRow(query, user.Name, user.Email, user.Password)
 	err := result.Scan(&id)
 	if err != nil {
+		logger.Log.Error("Error while signing up user: %v", err)
 		return 0, err
 	}
 	return id, nil
@@ -40,6 +42,7 @@ func (a *AuthPostgres) GetUser(username, password string, login bool) (models.Us
 	}
 	err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.UserType, &user.Subsription)
 	if err != nil {
+		logger.Log.Error("Error while getting user: %v", err)
 		return models.User{}, err
 	}
 	return user, nil

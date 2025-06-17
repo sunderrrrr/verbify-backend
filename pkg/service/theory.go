@@ -2,9 +2,9 @@ package service
 
 import (
 	"WhyAi/pkg/repository"
+	"WhyAi/pkg/utils/logger"
 	"fmt"
 	"io/ioutil"
-	"log"
 )
 
 type TheoryService struct {
@@ -19,7 +19,7 @@ func GetTheory(n string, forBot bool) (string, error) {
 
 	data, err := ioutil.ReadFile(fmt.Sprintf("./static/theory/%s.txt", n))
 	if err != nil {
-		log.Printf("Ошибка чтения файла: %v", err)
+		logger.Log.Error("Error while reading file: %v", err)
 		return "", err
 	}
 	return string(data), nil
@@ -28,6 +28,7 @@ func GetTheory(n string, forBot bool) (string, error) {
 func (t *TheoryService) SendTheory(n string, forBot bool) (string, error) {
 	theory, err := GetTheory(n, forBot)
 	if err != nil {
+		logger.Log.Error("Error while getting theory: %v", err)
 		return "", err
 	}
 	return theory, nil

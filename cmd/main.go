@@ -5,6 +5,7 @@ import (
 	"WhyAi/pkg/handler"
 	"WhyAi/pkg/repository"
 	"WhyAi/pkg/service"
+	"WhyAi/pkg/utils/logger"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -15,6 +16,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	//TODO Подвязать env
+	logger.Log.Println("Starting Verbify server")
 	db, err := repository.NewDB(repository.DB{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -24,14 +26,15 @@ func main() {
 		SSLMode:  os.Getenv("DB_SSL"),
 	})
 	if err != nil {
-		log.Fatal("error connecting to database: %s", err.Error())
+		logger.Log.Fatalf("Error connecting to database: %v", err)
 	}
+	logger.Log.Println("Connecting to database")
 	NewRepository := repository.NewRepository(db)
 	NewService := service.NewService(NewRepository)
 	NewHandler := handler.NewHandler(NewService)
 	server := new(WhyAi.Server)
-	err = server.Run(os.Getenv("SERVER_PORT"), NewHandler.InitRoutes(os.Getenv("FRONTEND_URL")))
-	if err != nil {
-		log.Fatal(err)
+	logger.Log.Println("Initializing routes")
+	if err = server.Run(os.Getenv("SERVER_PORT"), NewHandler.InitRoutes(os.Getenv("FRONTEND_URL"))); err != nil {
+		logger.Log.Fatalf("Fatal Error: %v", err)
 	}
 }

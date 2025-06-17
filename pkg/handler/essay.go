@@ -42,7 +42,7 @@ func (h *Handler) SendEssay(c *gin.Context) {
 			Content: request,
 		},
 	}
-	llmAsk, err := h.service.LLM.AskLLM(llmRequest)
+	llmAsk, err := h.service.LLM.AskLLM(llmRequest, true)
 	resp := strings.Replace(strings.Replace(strings.Replace(llmAsk.Content, "`", "", -1), "json", "", -1), "Ð", "", -1)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())

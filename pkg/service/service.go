@@ -3,6 +3,7 @@ package service
 import (
 	"WhyAi/models"
 	"WhyAi/pkg/repository"
+	"os"
 )
 
 type Service struct {
@@ -24,7 +25,7 @@ type Auth interface {
 }
 
 type LLM interface {
-	AskLLM(messages []models.Message) (*models.Message, error)
+	AskLLM(messages []models.Message, isEssay bool) (*models.Message, error)
 }
 
 type Chat interface {
@@ -51,7 +52,7 @@ func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		Auth:   NewAuthService(repo),
 		Theory: NewTheoryService(*repo),
-		LLM:    NewLLMService("https://api.proxyapi.ru/deepseek/chat/completions", "sk-zKw9A1XvnEQiztA0ENd84uAsvgPKgnG8"),
+		LLM:    NewLLMService(os.Getenv("DEEPSEEK_URL"), os.Getenv("DEEPSEEK_TOKEN")),
 		Chat:   NewChatService(*repo),
 		Facts:  NewFactService(),
 		Essay:  NewEssayService(),

@@ -17,7 +17,7 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (a *AuthPostgres) SignUp(user models.User) (int, error) {
 	var id int
-	query := fmt.Sprintf(`INSERT INTO %s (name, email, pass_hash, user_type, sub_level) VALUES ($1, $2,$3, 2, 2) RETURNING id`, userDb)
+	query := fmt.Sprintf(`INSERT INTO %s (name, email, pass_hash, user_type, sub_level) VALUES ($1, $2,$3, 1, 2) RETURNING id`, userDb)
 	result := a.db.QueryRow(query, user.Name, user.Email, user.Password)
 	err := result.Scan(&id)
 	if err != nil {
@@ -32,13 +32,13 @@ func (a *AuthPostgres) GetUser(username, password string, login bool) (models.Us
 	var user models.User
 	var result *sql.Row
 	if login {
-		query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1 AND pass_hash = $2`, userDb)
+		query := fmt.Sprintf(`SELECT * FROM %s WHERE email = $1 AND pass_hash = $2`, userDb)
 		result = a.db.QueryRow(query, username, password)
-	} else {
+	} else { // Если нужна проверка только по почте
 		query := fmt.Sprintf(`SELECT id, name, email FROM %s WHERE email = $1`, userDb)
 		result = a.db.QueryRow(query, username)
 	}
-	err := result.Scan(&user.Id, &user.Name, &user.Email)
+	err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.UserType, &user.Subsription)
 	if err != nil {
 		return models.User{}, err
 	}

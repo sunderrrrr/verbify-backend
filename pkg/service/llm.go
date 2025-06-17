@@ -5,11 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"regexp"
 	"strings"
-	"unicode"
 )
 
 type LLMService struct {
@@ -21,74 +18,57 @@ func NewLLMService(apiUrl string, token string) *LLMService {
 	return &LLMService{ApiUrl: apiUrl, Token: token}
 }
 
-func (s *LLMService) AskLLM(messages []models.Message) (*models.Message, error) {
+func (s *LLMService) AskLLM(messages []models.Message, isEssay bool) (*models.Message, error) {
 	request := models.LLMRequest{
 		Model:       "deepseek-chat",
 		Temperature: 0,
 		Messages:    messages,
 	}
-
-	//fmt.Println("request", request)
+	var res models.LLMResponse
 	body, err := json.Marshal(request)
 	if err != nil {
 		return nil, errors.New("request marshal fail")
 	}
+
 	req, err := http.NewRequest("POST", s.ApiUrl, bytes.NewReader(body))
-	if err != nil {
-		return nil, errors.New("fail request")
-	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+s.Token)
-
 	resp, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		return nil, errors.New("fail request")
 	}
 	defer resp.Body.Close()
 
-	var res models.LLMResponse
-	err = json.NewDecoder(resp.Body).Decode(&res)
-
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return nil, errors.New("fail to decode response " + err.Error())
 	}
 	if len(res.Choices) == 0 {
 		return nil, errors.New("no choices in response")
 	}
-	//return &res.Choices[0].Message, nil
 	ans := &res.Choices[0].Message
-	fmt.Println(ans)
-	ans.Content, _ = extractJSONFromMarkdown(ans.Content)
+	if isEssay {
+		ans.Content, _ = getJson(ans.Content)
+	}
 	return ans, nil
 }
 
-func cleanResponseWithMarkdown(raw string) string {
-	// Удаляем бинарные/непечатные символы, сохраняя Markdown
-	cleaned := strings.Map(func(r rune) rune {
-		// Сохраняем символы Markdown: # * ` [ ] ! и др.
-		if (r >= ' ' && r <= '~') || unicode.IsSpace(r) ||
-			r == '#' || r == '*' || r == '`' || r == '[' ||
-			r == ']' || r == '!' || r == '_' || r == '-' {
-			return r
+func cleanText(text string) string {
+	result := ""
+	for _, char := range text {
+		if char >= ' ' && char <= '~' {
+			result += string(char)
+		} else if char == '\n' || char == ' ' {
+			result += string(char)
 		}
-		return -1
-	}, raw)
-
-	// Дополнительная обработка частых проблем
-	cleaned = strings.ReplaceAll(cleaned, "“", `"`) // Замена "умных" кавычек
-	cleaned = strings.ReplaceAll(cleaned, "”", `"`)
-	return cleaned
-}
-func extractJSONFromMarkdown(raw string) (string, error) {
-	// Регулярное выражение для поиска JSON-блока
-	re := regexp.MustCompile(`(?s)\x60{0,3}json\s*(\{.*?\})\x60{0,3}`)
-	matches := re.FindStringSubmatch(raw)
-
-	if len(matches) > 1 {
-		return matches[1], nil
 	}
+	return result
+}
+func getJson(text string) (string, error) {
+	start := strings.Index(text, "{")
+	end := strings.Index(text, "}")
 
-	// Если JSON не найден, возвращаем очищенный текст
-	return cleanResponseWithMarkdown(raw), nil
+	if start != -1 && end != -1 && start < end {
+		return text[start : end+1], nil
+	}
+	return cleanText(text), nil
 }

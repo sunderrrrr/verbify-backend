@@ -23,6 +23,9 @@ func NewUserService(repo repository.User) *UserService {
 	return &UserService{repo: repo}
 }
 func (s *UserService) GeneratePasswordResetToken(email, signingKey string) (string, error) {
+	if email == "" || email == " " {
+		return "", errors.New("email is empty")
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &ResetClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL / 72).Unix(),

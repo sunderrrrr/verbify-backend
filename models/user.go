@@ -5,8 +5,8 @@ type User struct {
 	Name        string `json:"name" db:"name" binding:"required"`
 	Email       string `json:"email"  binding:"required" db:"email"`
 	Password    string `json:"password"  binding:"required"`
-	Subsription int    `json:"subscription" db:"sub"`
-	UserType    string `json:"user_type" db:"user_type"`
+	Subsription int    `json:"subscription" db:"sub_level"` // 0 - Ультра; 1 - Премиум; 2 - Базовый
+	UserType    int    `json:"user_type" db:"user_type"`    // 0 - Пользователь; 1 - Админ
 }
 type AuthUser struct {
 	Email    string `json:"email"  binding:"required"`

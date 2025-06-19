@@ -16,7 +16,7 @@ type UserService struct {
 }
 type ResetClaims struct {
 	jwt.StandardClaims
-	Username string `json:"username"`
+	Email string `json:"email"`
 }
 
 func NewUserService(repo repository.User) *UserService {
@@ -57,7 +57,7 @@ func (s *UserService) ResetPassword(resetModel models.UserReset) error {
 		return errors.New("token claims are not of type jwt.MapClaims or token invalid")
 
 	}
-	email := claims.Username
+	email := claims.Email
 	if email == "" {
 		logger.Log.Error("Empty email in token claims")
 		return errors.New("empty email")

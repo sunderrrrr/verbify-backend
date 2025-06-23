@@ -1,14 +1,21 @@
-FROM golang:1.20-alpine
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
-# Копируем ВСЕ файлы бэкенда
 COPY . .
 
-# Собираем приложение
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/backend
+RUN go build -o server cmd/main.go
 
-EXPOSE 8080
+FROM debian:bookworm-slim
 
-CMD ["/app/backend"]
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/server .
+COPY --from=builder /app/static ./static
+
+ENV GIN_MODE=release
+
+CMD ["./server"]

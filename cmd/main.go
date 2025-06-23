@@ -6,17 +6,17 @@ import (
 	"WhyAi/pkg/repository"
 	"WhyAi/pkg/service"
 	"WhyAi/pkg/utils/logger"
-	"github.com/joho/godotenv"
-	"log"
+	"fmt"
 	"os"
 )
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	//TODO Подвязать env
-	logger.Log.Println("Starting Verbify server")
+	/*if err := godotenv.Load(".env"); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}*/
+	fmt.Println("Initializing...")
+	fmt.Println("\n██╗   ██╗███████╗██████╗ ██████╗ ██╗███████╗██╗   ██╗\n██║   ██║██╔════╝██╔══██╗██╔══██╗██║██╔════╝╚██╗ ██╔╝\n██║   ██║█████╗  ██████╔╝██████╔╝██║█████╗   ╚████╔╝ \n╚██╗ ██╔╝██╔══╝  ██╔══██╗██╔══██╗██║██╔══╝    ╚██╔╝  \n ╚████╔╝ ███████╗██║  ██║██████╔╝██║██║        ██║   \n  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝        ╚═╝   \n                                                     \n")
+	fmt.Println("Version: 1.0.0")
 	db, err := repository.NewDB(repository.DB{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -33,7 +33,7 @@ func main() {
 	NewService := service.NewService(NewRepository)
 	NewHandler := handler.NewHandler(NewService)
 	server := new(WhyAi.Server)
-	logger.Log.Println("Initializing routes")
+	logger.Log.Println("Running server")
 	if err = server.Run(os.Getenv("SERVER_PORT"), NewHandler.InitRoutes(os.Getenv("FRONTEND_URL"))); err != nil {
 		logger.Log.Fatalf("Fatal Error: %v", err)
 	}

@@ -46,6 +46,7 @@ type User interface {
 	ResetPassword(resetModel models.UserReset) error
 	ResetPasswordRequest(email models.ResetRequest) error
 	GeneratePasswordResetToken(email, signingKey string) (string, error)
+	GetRoleById(userId int) (int, error)
 }
 
 func NewService(repo *repository.Repository) *Service {

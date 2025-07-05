@@ -25,6 +25,7 @@ type Auth interface {
 }
 
 type User interface {
+	GetRoleById(userId int) (int, error)
 	ResetPassword(username string, newPassword string) error
 }
 

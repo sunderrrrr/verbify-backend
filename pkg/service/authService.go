@@ -21,10 +21,7 @@ func NewAuthService(repo repository.Auth) *AuthService {
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	UserId   int    `json:"user_id"`
-	Username string `json:"name"`
-	UserType int    `json:"user"`
-	Sub      int    `json:"sub"` // 0 - Ультра; 1 - Премиум; 2 - Базовый
+	UserId int `json:"user_id"`
 }
 
 const (
@@ -48,9 +45,6 @@ func (s *AuthService) GenerateToken(login models.AuthUser) (string, error) {
 			IssuedAt:  time.Now().Unix(),
 		},
 		user.Id,
-		user.Name,
-		user.UserType,
-		user.Subsription,
 	})
 	return token.SignedString([]byte(signingKey))
 }
@@ -75,10 +69,7 @@ func (s *AuthService) ParseToken(accessToken string) (models.User, error) {
 	}
 
 	returnUser := models.User{
-		Id:          claims.UserId,
-		Name:        claims.Username,
-		UserType:    claims.UserType,
-		Subsription: claims.Sub,
+		Id: claims.UserId,
 	}
 
 	return returnUser, nil

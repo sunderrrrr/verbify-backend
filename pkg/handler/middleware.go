@@ -11,7 +11,7 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
-	usernameCtx         = "username"
+	roleCtx             = "roleId"
 )
 
 // Промежуточкая аунтентификация пользователя
@@ -21,23 +21,23 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no authorization header")
 		return
 	}
-
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 {
 		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid authorization header")
 		return
 	}
-
-	// parse token
-	//fmt.Println("middleware: headerParts", headerParts[1])
 	userId, err := h.service.Auth.ParseToken(headerParts[1])
 	if err != nil {
 		responser.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
+	roleId, err := h.service.User.GetRoleById(userId.Id)
+	if err != nil {
+		responser.NewErrorResponse(c, http.StatusInternalServerError, "middleware.go: get role by id failed")
+		return
+	}
+	c.Set(roleCtx, roleId)
 	c.Set(userCtx, userId.Id)
-	c.Set(usernameCtx, userId.Name)
-	//fmt.Println("middleware.go: userId:", userId)
 }
 
 func getUserId(c *gin.Context) (int, error) {
@@ -54,11 +54,16 @@ func getUserId(c *gin.Context) (int, error) {
 	return idInt, nil
 }
 
-func getUsername(c *gin.Context) (string, error) {
-	username, ok := c.Get(usernameCtx)
+func getRoleId(c *gin.Context) (int, error) {
+	id, ok := c.Get(roleCtx)
 	if !ok {
-		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no user id")
-		return "", errors.New("middleware.go: no user id")
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: no role id")
+		return 0, errors.New("middleware.go: no role id")
 	}
-	return username.(string), nil
+	idInt, ok := id.(int)
+	if !ok {
+		responser.NewErrorResponse(c, http.StatusUnauthorized, "middleware.go: invalid role id")
+		return 0, errors.New("middleware.go: invalid role id")
+	}
+	return idInt, nil
 }

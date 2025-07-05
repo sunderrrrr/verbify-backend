@@ -31,3 +31,12 @@ func (ur *UserPostgres) ResetPassword(username string, newPassword string) error
 	}
 	return tx.Commit()
 }
+func (ur *UserPostgres) GetRoleById(userId int) (int, error) {
+	var role int
+	query := fmt.Sprintf("SELECT user_type FROM %s WHERE id=$1", userDb)
+	err := ur.db.Get(&role, query, userId)
+	if err != nil {
+		return 0, err
+	}
+	return role, nil
+}

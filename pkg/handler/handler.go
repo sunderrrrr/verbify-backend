@@ -39,11 +39,13 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 				auth.POST("/forgot", h.SendResetRequest)
 				auth.POST("/reset", h.UpdatePassword)
 			}
+
 			user := v1.Group("/user", h.userIdentity) // Инфа пользователя, подписки
 			{
 				user.GET("/info", h.GetUserInfo)
 				user.PUT("/update", h.UpdateUserInfo)
 			}
+
 			theory := v1.Group("/theory", h.userIdentity)
 			{
 				theory.GET("/:id", h.SendTheory)           //Получение теории
@@ -51,11 +53,13 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 				theory.GET("/:id/chat", h.GetOrCreateChat) // Получить чат
 				theory.DELETE("/:id/chat", h.ClearContext) //Стереть контекст
 			}
+
 			essay := v1.Group("/essay", h.userIdentity)
 			{
 				essay.GET("/themes", h.GetEssayTasks)
 				essay.POST("/", h.SendEssay)
 			}
+
 			fact := v1.Group("/fact")
 			fact.Use(cors.New(cors.Config{
 				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -67,6 +71,10 @@ func (h *Handler) InitRoutes(frontendUrl string) *gin.Engine {
 			}))
 			{
 				fact.GET("", h.GetFact) //Получить случайный лайфхак, ну или массив лайфхаков, чтобы уменьшить нагрузку
+			}
+			admin := v1.Group("/admin", h.userIdentity, h.adminIdentity) //Админка
+			{
+				admin.GET("/")
 			}
 		}
 

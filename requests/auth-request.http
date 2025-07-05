@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "name": "qw",
-  "email": "qw1@wqw",
+  "email": "admin",
   "password": "123"
 }
 
@@ -13,6 +13,6 @@ POST http://localhost:8090/api/v1/auth/sign-in
 Content-Type: application/json
 
 {
-  "email": "qw1@wqw",
-  "password": "12345"
+  "email": "admin",
+  "password": "123"
 }

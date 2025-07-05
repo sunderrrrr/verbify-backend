@@ -65,6 +65,10 @@ func (s *UserService) ResetPassword(resetModel models.UserReset) error {
 	return s.repo.ResetPassword(email, generatePasswordHash(resetModel.NewPass))
 }
 
+func (s *UserService) GetRoleById(userId int) (int, error) {
+	return s.repo.GetRoleById(userId)
+}
+
 func (s *UserService) ResetPasswordRequest(email models.ResetRequest) error {
 	token, err := s.GeneratePasswordResetToken(email.Login, signingKey)
 	if err != nil {

@@ -7,13 +7,15 @@ import (
 	"WhyAi/pkg/service"
 	"WhyAi/pkg/utils/logger"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 )
 
 func main() {
-	/*if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
-	}*/
+	}
 	fmt.Println("Initializing...")
 	fmt.Println("\n██╗   ██╗███████╗██████╗ ██████╗ ██╗███████╗██╗   ██╗\n██║   ██║██╔════╝██╔══██╗██╔══██╗██║██╔════╝╚██╗ ██╔╝\n██║   ██║█████╗  ██████╔╝██████╔╝██║█████╗   ╚████╔╝ \n╚██╗ ██╔╝██╔══╝  ██╔══██╗██╔══██╗██║██╔══╝    ╚██╔╝  \n ╚████╔╝ ███████╗██║  ██║██████╔╝██║██║        ██║   \n  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝        ╚═╝   \n                                                     \n")
 	fmt.Println("Version: 1.0.0")
